@@ -1,5 +1,9 @@
 import chalk from "chalk";
 
+// Force chalk to output colors even when piped (e.g., when running as a Claude Code statusline hook)
+// Level 3 = truecolor (16 million colors) which is supported by modern terminals
+chalk.level = 3;
+
 export interface ColorStyle {
   fg?: string;
   bg?: string;
