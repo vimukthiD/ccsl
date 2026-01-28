@@ -249,10 +249,10 @@ ccsl install
 # Option 2: Install directly from the built package
 cd /path/to/ccsl
 npm run build
-npm pack  # Creates @vimukthid-ccsl-1.0.0.tgz
+npm pack  # Creates @vimukthid-ccsl-1.0.4.tgz
 
 # Install the tarball globally
-npm install -g ./vimukthid-ccsl-1.0.0.tgz
+npm install -g ./vimukthid-ccsl-1.0.4.tgz
 ```
 
 ```bash
