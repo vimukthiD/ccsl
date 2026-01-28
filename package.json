@@ -1,6 +1,6 @@
 {
   "name": "@vimukthid/ccsl",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "description": "Customizable status line formatter for Claude Code CLI",
   "main": "dist/index.cjs",
