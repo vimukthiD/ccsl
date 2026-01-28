@@ -20,7 +20,7 @@ const program = new Command();
 program
   .name("ccsl")
   .description("Customizable status line formatter for Claude Code CLI")
-  .version("1.0.0");
+  .version("0.0.1");
 
 program
   .command("install")

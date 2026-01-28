@@ -62,4 +62,11 @@ export const sampleStatusInput: StatusInput = {
       cache_read_input_tokens: 2000,
     },
   },
+  session_usage: {
+    requests_used: 45,
+    requests_limit: 100,
+    usage_percentage: 45,
+    reset_in_seconds: 7200,
+    plan: "Pro",
+  },
 };

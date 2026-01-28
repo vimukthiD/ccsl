@@ -52,6 +52,23 @@ export const StatusInputSchema = z
           .optional(),
       })
       .optional(),
+    // Session usage and rate limit information
+    session_usage: z
+      .object({
+        // Number of requests/messages used in current session
+        requests_used: z.number().optional(),
+        // Maximum requests allowed in the session period
+        requests_limit: z.number().optional(),
+        // Percentage of session usage (0-100)
+        usage_percentage: z.number().optional(),
+        // ISO timestamp when the usage limit resets
+        reset_at: z.string().optional(),
+        // Seconds until reset
+        reset_in_seconds: z.number().optional(),
+        // Plan/tier name (e.g., "Pro", "Free", "Max")
+        plan: z.string().optional(),
+      })
+      .optional(),
   })
   .passthrough();
 

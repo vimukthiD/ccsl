@@ -9,7 +9,9 @@ export type IconKey =
   | "duration"
   | "lines"
   | "directory"
-  | "version";
+  | "version"
+  | "usage"
+  | "resetTime";
 
 const nerdIcons: Record<IconKey, string> = {
   model: "◈",
@@ -20,6 +22,8 @@ const nerdIcons: Record<IconKey, string> = {
   lines: "±",
   directory: "",
   version: "",
+  usage: "󰓅",
+  resetTime: "󰔟",
 };
 
 const unicodeIcons: Record<IconKey, string> = {
@@ -31,6 +35,8 @@ const unicodeIcons: Record<IconKey, string> = {
   lines: "±",
   directory: "📁",
   version: "v",
+  usage: "▰",
+  resetTime: "⟳",
 };
 
 const asciiIcons: Record<IconKey, string> = {
@@ -42,6 +48,8 @@ const asciiIcons: Record<IconKey, string> = {
   lines: "",
   directory: "",
   version: "v",
+  usage: "#",
+  resetTime: "~",
 };
 
 let detectedIconMode: IconMode | null = null;

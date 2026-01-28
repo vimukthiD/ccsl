@@ -77,9 +77,30 @@ ccsl receives JSON via stdin with the following structure:
       "cache_creation_input_tokens": 5000,
       "cache_read_input_tokens": 2000
     }
+  },
+  "session_usage": {
+    "requests_used": 45,
+    "requests_limit": 100,
+    "usage_percentage": 45,
+    "reset_at": "2025-01-29T10:00:00Z",
+    "reset_in_seconds": 7200,
+    "plan": "Pro"
   }
 }
 ```
+
+#### Session Usage Fields
+
+The `session_usage` object provides usage limit information for the `usage` and `resetTime` widgets:
+
+| Field              | Type   | Description                               |
+|--------------------|--------|-------------------------------------------|
+| `requests_used`    | number | Number of requests used in current period |
+| `requests_limit`   | number | Maximum requests allowed                  |
+| `usage_percentage` | number | Usage percentage (0-100)                  |
+| `reset_at`         | string | ISO timestamp when usage resets           |
+| `reset_in_seconds` | number | Seconds until usage resets                |
+| `plan`             | string | Plan/tier name (e.g., "Pro", "Max")       |
 
 ---
 
@@ -87,23 +108,32 @@ ccsl receives JSON via stdin with the following structure:
 
 ### 3.1 Status Line Widgets
 
-| Widget | Description | Example Output |
-|--------|-------------|----------------|
-| Model | Current Claude model display name | `◈ Opus` |
-| Context | Context window usage percentage | `◐ 42%` |
-| Tokens | Input/Output token counts | `↑15.2k ↓4.5k` |
-| Cost | Session cost in USD | `$0.01` |
-| Duration | Session duration | `⏱ 45s` |
-| Lines | Lines added/removed | `+156 -23` |
-| Directory | Current working directory | `📁 my-project` |
-| Version | Claude Code version | `v1.0.80` |
+| Widget    | Description                       | Example Output       |
+|-----------|-----------------------------------|----------------------|
+| Model     | Current Claude model display name | `◈ Opus`             |
+| Context   | Context window usage percentage   | `◐ 42%`              |
+| Tokens    | Input/Output token counts         | `↑15.2k ↓4.5k`       |
+| Cost      | Session cost in USD               | `$0.01`              |
+| Duration  | Session duration                  | `⏱ 45s`              |
+| Lines     | Lines added/removed               | `+156 -23`           |
+| Directory | Current working directory         | `📁 my-project`      |
+| Version   | Claude Code version               | `v1.0.80`            |
+| Usage     | Session usage with limit          | `▰▰▰▱▱ 75/100 (Pro)` |
+| ResetTime | Time until usage resets           | `⟳ 1h30m`            |
 
 ### 3.2 Configuration Scopes
 
-| Scope | Location | Priority |
-|-------|----------|----------|
-| Local | `./.ccslrc.json` | Highest |
-| Global | `~/.config/ccsl/config.json` | Default |
+| Scope  | Location                     | Priority | Use Case                   |
+|--------|------------------------------|----------|----------------------------|
+| Local  | `./.ccslrc.json`             | Highest  | Project-specific settings  |
+| Global | `~/.config/ccsl/config.json` | Default  | User-wide default settings |
+
+**Configuration Priority:** Local config takes precedence. If no local config exists, the global config is used automatically.
+
+```bash
+ccsl config --global    # Edit global configuration
+ccsl config --local     # Edit local configuration (default)
+```
 
 ### 3.3 Icon Support
 - **Nerd Font Icons** - Rich glyphs when Nerd Fonts detected
@@ -238,7 +268,7 @@ Muted blues and grays, enterprise-friendly appearance
     "widgets": {
       "type": "array",
       "items": {
-        "enum": ["model", "context", "tokens", "cost", "duration", "lines", "directory", "version"]
+        "enum": ["model", "context", "tokens", "cost", "duration", "lines", "directory", "version", "usage", "resetTime"]
       },
       "default": ["model", "context", "tokens", "cost"]
     },
@@ -336,7 +366,11 @@ ccsl --help           # Show help
       "linesRemoved": { "fg": "#e06c75" },
       "directory": { "fg": "#61afef" },
       "version": { "fg": "#abb2bf" },
-      "separator": { "fg": "#5c6370" }
+      "separator": { "fg": "#5c6370" },
+      "usage": { "fg": "#98c379" },
+      "usageHigh": { "fg": "#e5c07b" },
+      "usageCritical": { "fg": "#e06c75" },
+      "resetTime": { "fg": "#61afef" }
     },
     "icons": {
       "model": "◈",
@@ -346,7 +380,9 @@ ccsl --help           # Show help
       "duration": "⏱",
       "lines": "±",
       "directory": "📁",
-      "version": "v"
+      "version": "v",
+      "usage": "▰",
+      "resetTime": "⟳"
     }
   }
 }

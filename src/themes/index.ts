@@ -15,6 +15,10 @@ export interface ThemeColors {
   directory?: ColorStyle;
   version?: ColorStyle;
   separator?: ColorStyle;
+  usage?: ColorStyle;
+  usageHigh?: ColorStyle;
+  usageCritical?: ColorStyle;
+  resetTime?: ColorStyle;
 }
 
 export interface Theme {
@@ -40,6 +44,10 @@ const neonTheme: Theme = {
     directory: { fg: "#00ffff" },
     version: { fg: "#aaaaff" },
     separator: { fg: "#666666" },
+    usage: { fg: "#00ffaa" },
+    usageHigh: { fg: "#ffff00" },
+    usageCritical: { fg: "#ff0000", bold: true },
+    resetTime: { fg: "#ff00ff" },
   },
 };
 
@@ -60,6 +68,10 @@ const rainbowTheme: Theme = {
     directory: { fg: "#ff7f00" },
     version: { fg: "#9400d3" },
     separator: { fg: "#888888" },
+    usage: { fg: "#00ffff" },
+    usageHigh: { fg: "#ffff00" },
+    usageCritical: { fg: "#ff0000", bold: true },
+    resetTime: { fg: "#ff7f00" },
   },
 };
 
@@ -80,6 +92,10 @@ const oceanTheme: Theme = {
     directory: { fg: "#00bcd4" },
     version: { fg: "#80deea" },
     separator: { fg: "#37474f" },
+    usage: { fg: "#26c6da" },
+    usageHigh: { fg: "#4dd0e1" },
+    usageCritical: { fg: "#ff5252", bold: true },
+    resetTime: { fg: "#0288d1" },
   },
 };
 
@@ -100,6 +116,10 @@ const minimalTheme: Theme = {
     directory: { fg: "#888888" },
     version: { fg: "#5c6370" },
     separator: { fg: "#444444" },
+    usage: { fg: "#98c379" },
+    usageHigh: { fg: "#e5c07b" },
+    usageCritical: { fg: "#e06c75", bold: true },
+    resetTime: { fg: "#61afef" },
   },
   icons: {
     model: "",
@@ -108,6 +128,8 @@ const minimalTheme: Theme = {
     duration: "",
     lines: "",
     directory: "",
+    usage: "",
+    resetTime: "",
   },
 };
 
@@ -128,6 +150,10 @@ const monochromeTheme: Theme = {
     directory: { fg: "#aaaaaa" },
     version: { fg: "#666666" },
     separator: { fg: "#444444" },
+    usage: { fg: "#bbbbbb" },
+    usageHigh: { fg: "#ffffff", bold: true },
+    usageCritical: { fg: "#ffffff", bold: true, underline: true },
+    resetTime: { fg: "#999999" },
   },
   icons: {
     model: "",
@@ -136,6 +162,8 @@ const monochromeTheme: Theme = {
     duration: "",
     lines: "",
     directory: "",
+    usage: "",
+    resetTime: "",
   },
 };
 
@@ -156,6 +184,10 @@ const corporateTheme: Theme = {
     directory: { fg: "#3b82f6" },
     version: { fg: "#94a3b8" },
     separator: { fg: "#334155" },
+    usage: { fg: "#22c55e" },
+    usageHigh: { fg: "#f59e0b" },
+    usageCritical: { fg: "#ef4444", bold: true },
+    resetTime: { fg: "#3b82f6" },
   },
 };
 

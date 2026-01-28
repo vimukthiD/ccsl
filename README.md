@@ -51,16 +51,18 @@ Claude Code passes JSON data via stdin to ccsl, which formats it into a beautifu
 
 ### Available Widgets
 
-| Widget      | Description            | Example        |
-|-------------|------------------------|----------------|
-| `model`     | Claude model name      | `Opus`         |
-| `context`   | Context window usage % | `42%`          |
-| `tokens`    | Input/Output tokens    | `↑15.2k ↓4.5k` |
-| `cost`      | Session cost USD       | `$0.02`        |
-| `duration`  | Session duration       | `45s`          |
-| `lines`     | Lines added/removed    | `+156 -23`     |
-| `directory` | Current directory      | `my-project`   |
-| `version`   | Claude Code version    | `v1.0.80`      |
+| Widget      | Description                | Example              |
+|-------------|----------------------------|----------------------|
+| `model`     | Claude model name          | `Opus`               |
+| `context`   | Context window usage %     | `42%`                |
+| `tokens`    | Input/Output tokens        | `↑15.2k ↓4.5k`       |
+| `cost`      | Session cost USD           | `$0.02`              |
+| `duration`  | Session duration           | `45s`                |
+| `lines`     | Lines added/removed        | `+156 -23`           |
+| `directory` | Current directory          | `my-project`         |
+| `version`   | Claude Code version        | `v1.0.80`            |
+| `usage`     | Session usage with limit   | `▰▰▰▱▱ 75/100 (Pro)` |
+| `resetTime` | Time until usage resets    | `1h30m`              |
 
 ### Built-in Themes
 
@@ -99,7 +101,8 @@ ccsl theme --list         # List available themes
 ccsl preview              # Preview with sample data
 ccsl init                 # Create local config file
 ccsl init --global        # Create global config file
-ccsl config               # Open TUI configuration
+ccsl config               # Open TUI configuration (local)
+ccsl config --global      # Open TUI configuration (global)
 ccsl --version            # Show version
 ccsl --help               # Show help
 ```
@@ -108,10 +111,20 @@ ccsl --help               # Show help
 
 ### Config File Locations
 
-| Scope  | Location                     | Priority |
-|--------|------------------------------|----------|
-| Local  | `.ccslrc.json`               | Highest  |
-| Global | `~/.config/ccsl/config.json` | Default  |
+| Scope  | Location                     | Priority | Use Case                    |
+|--------|------------------------------|----------|-----------------------------|
+| Local  | `.ccslrc.json`               | Highest  | Project-specific settings   |
+| Global | `~/.config/ccsl/config.json` | Default  | User-wide default settings  |
+
+**Configuration Priority:** Local config takes precedence over global config. If no local config exists, the global config is used.
+
+```bash
+# Configure global settings (applies to all projects)
+ccsl config --global
+
+# Configure local settings (project-specific)
+ccsl config --local   # or just: ccsl config
+```
 
 ### Config Schema
 
@@ -145,7 +158,11 @@ ccsl --help               # Show help
       "linesRemoved": { "fg": "#e06c75" },
       "directory": { "fg": "#61afef" },
       "version": { "fg": "#abb2bf" },
-      "separator": { "fg": "#5c6370" }
+      "separator": { "fg": "#5c6370" },
+      "usage": { "fg": "#98c379" },
+      "usageHigh": { "fg": "#e5c07b" },
+      "usageCritical": { "fg": "#e06c75" },
+      "resetTime": { "fg": "#61afef" }
     }
   }
 }
@@ -170,9 +187,29 @@ ccsl receives JSON from Claude Code via stdin:
     "total_lines_removed": 23
   },
   "workspace": { "current_dir": "/path/to/project" },
-  "version": "1.0.80"
+  "version": "1.0.80",
+  "session_usage": {
+    "requests_used": 45,
+    "requests_limit": 100,
+    "usage_percentage": 45,
+    "reset_in_seconds": 7200,
+    "plan": "Pro"
+  }
 }
 ```
+
+### Session Usage Fields
+
+The `session_usage` object supports the following fields for the `usage` and `resetTime` widgets:
+
+| Field              | Type   | Description                               |
+|--------------------|--------|-------------------------------------------|
+| `requests_used`    | number | Number of requests used in current period |
+| `requests_limit`   | number | Maximum requests allowed                  |
+| `usage_percentage` | number | Usage percentage (0-100)                  |
+| `reset_at`         | string | ISO timestamp when usage resets           |
+| `reset_in_seconds` | number | Seconds until usage resets                |
+| `plan`             | string | Plan/tier name (e.g., "Pro", "Max")       |
 
 ## Development
 

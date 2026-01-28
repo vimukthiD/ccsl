@@ -14,7 +14,9 @@ export type WidgetType =
   | "duration"
   | "lines"
   | "directory"
-  | "version";
+  | "version"
+  | "usage"
+  | "resetTime";
 
 export const availableWidgets: WidgetType[] = [
   "model",
@@ -25,6 +27,8 @@ export const availableWidgets: WidgetType[] = [
   "lines",
   "directory",
   "version",
+  "usage",
+  "resetTime",
 ];
 
 export interface WidgetResult {
@@ -55,6 +59,10 @@ export function renderWidget(
       return renderDirectory(input, theme, config);
     case "version":
       return renderVersion(input, theme, config);
+    case "usage":
+      return renderUsage(input, theme, config);
+    case "resetTime":
+      return renderResetTime(input, theme, config);
     default:
       return { content: "", visible: false };
   }
@@ -210,4 +218,144 @@ function renderVersion(input: StatusInput, theme: Theme, config: CcslConfig): Wi
   const content = applyStyle(text, theme.colors.version);
 
   return { content, visible: true };
+}
+
+function renderUsage(input: StatusInput, theme: Theme, config: CcslConfig): WidgetResult {
+  const sessionUsage = input.session_usage;
+  if (!sessionUsage) {
+    return { content: "", visible: false };
+  }
+
+  const { requests_used, requests_limit, usage_percentage, plan } = sessionUsage;
+
+  // Need at least some usage info to display
+  if (requests_used === undefined && usage_percentage === undefined) {
+    return { content: "", visible: false };
+  }
+
+  const icon = getIcon("usage", theme, config.icons);
+
+  // Calculate percentage if not provided
+  let percent = usage_percentage;
+  if (percent === undefined && requests_used !== undefined && requests_limit !== undefined && requests_limit > 0) {
+    percent = (requests_used / requests_limit) * 100;
+  }
+
+  // Build the display string
+  let text = "";
+  if (icon) {
+    text += `${icon} `;
+  }
+
+  // Show usage bar if we have percentage
+  if (percent !== undefined) {
+    const progressBar = renderUsageBar(percent, theme);
+    text += progressBar + " ";
+  }
+
+  // Show counts if available
+  if (requests_used !== undefined && requests_limit !== undefined) {
+    text += `${requests_used}/${requests_limit}`;
+  } else if (percent !== undefined) {
+    text += `${Math.round(percent)}%`;
+  }
+
+  // Append plan if available
+  if (plan) {
+    text += ` (${plan})`;
+  }
+
+  // Color based on usage level
+  let colorKey: "usage" | "usageHigh" | "usageCritical" = "usage";
+  if (percent !== undefined) {
+    if (percent >= 90) {
+      colorKey = "usageCritical";
+    } else if (percent >= 70) {
+      colorKey = "usageHigh";
+    }
+  }
+
+  const style = theme.colors[colorKey] || theme.colors.usage;
+  const content = applyStyle(text.trim(), style);
+
+  return { content, visible: true };
+}
+
+function renderUsageBar(percentage: number, theme: Theme): string {
+  const totalBars = 5;
+  const filledBars = Math.round((percentage / 100) * totalBars);
+  const emptyBars = totalBars - filledBars;
+
+  const filledChar = "▰";
+  const emptyChar = "▱";
+
+  // Color the filled portion based on usage level
+  let filledStyle = theme.colors.usage;
+  if (percentage >= 90) {
+    filledStyle = theme.colors.usageCritical || theme.colors.usage;
+  } else if (percentage >= 70) {
+    filledStyle = theme.colors.usageHigh || theme.colors.usage;
+  }
+
+  const filled = applyStyle(filledChar.repeat(filledBars), filledStyle);
+  const empty = applyStyle(emptyChar.repeat(emptyBars), { fg: "#444444", dim: true });
+
+  return `${filled}${empty}`;
+}
+
+function renderResetTime(input: StatusInput, theme: Theme, config: CcslConfig): WidgetResult {
+  const sessionUsage = input.session_usage;
+  if (!sessionUsage) {
+    return { content: "", visible: false };
+  }
+
+  const { reset_at, reset_in_seconds } = sessionUsage;
+
+  // Need reset time info
+  if (reset_at === undefined && reset_in_seconds === undefined) {
+    return { content: "", visible: false };
+  }
+
+  const icon = getIcon("resetTime", theme, config.icons);
+
+  let timeStr = "";
+  if (reset_in_seconds !== undefined) {
+    timeStr = formatResetDuration(reset_in_seconds);
+  } else if (reset_at) {
+    // Parse ISO timestamp and calculate time until reset
+    try {
+      const resetDate = new Date(reset_at);
+      const now = new Date();
+      const diffSeconds = Math.max(0, Math.floor((resetDate.getTime() - now.getTime()) / 1000));
+      timeStr = formatResetDuration(diffSeconds);
+    } catch {
+      // If parsing fails, show the raw timestamp
+      timeStr = reset_at;
+    }
+  }
+
+  const text = icon ? `${icon} ${timeStr}` : timeStr;
+  const content = applyStyle(text, theme.colors.resetTime);
+
+  return { content, visible: true };
+}
+
+function formatResetDuration(seconds: number): string {
+  if (seconds <= 0) {
+    return "now";
+  }
+
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+
+  if (hours > 0) {
+    return minutes > 0 ? `${hours}h${minutes}m` : `${hours}h`;
+  }
+
+  if (minutes > 0) {
+    const secs = seconds % 60;
+    return secs > 0 ? `${minutes}m${secs}s` : `${minutes}m`;
+  }
+
+  return `${seconds}s`;
 }

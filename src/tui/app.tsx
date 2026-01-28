@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { render, Box, Text, useApp, useInput } from "ink";
 import SelectInput from "ink-select-input";
-import { loadConfig, getConfigPath, type CcslConfig } from "../config/loader.js";
+import { loadConfigForScope, getConfigPath, type CcslConfig } from "../config/loader.js";
 import { themeNames } from "../themes/index.js";
 import { formatStatusLine, sampleStatusInput } from "../formatter.js";
 import { availableWidgets, type WidgetType } from "../widgets/index.js";
@@ -56,13 +56,13 @@ function App({ initialConfig, scope }: AppProps) {
 
   const renderMain = () => {
     const items = [
-      { label: "Select Theme", value: "themes" },
-      { label: "Configure Widgets", value: "widgets" },
-      { label: "General Settings", value: "settings" },
-      { label: "Live Preview", value: "preview" },
-      { label: "Install to Claude Code", value: "install" },
-      { label: "Save Configuration", value: "save" },
-      { label: "Exit", value: "exit" },
+      { label: "🎨 Select Theme", value: "themes" },
+      { label: "📊 Configure Widgets", value: "widgets" },
+      { label: "⚙️  General Settings", value: "settings" },
+      { label: "👁️  Live Preview", value: "preview" },
+      { label: "📦 Install to Claude Code", value: "install" },
+      { label: "💾 Save Configuration", value: "save" },
+      { label: "❌ Exit", value: "exit" },
     ];
 
     return (
@@ -107,7 +107,7 @@ function App({ initialConfig, scope }: AppProps) {
       <Box flexDirection="column">
         <Box marginBottom={1}>
           <Text bold color="cyan">
-            Select Theme
+            🎨 Select Theme
           </Text>
         </Box>
         <SelectInput
@@ -138,7 +138,7 @@ function App({ initialConfig, scope }: AppProps) {
       <Box flexDirection="column">
         <Box marginBottom={1}>
           <Text bold color="cyan">
-            Configure Widgets
+            📊 Configure Widgets
           </Text>
         </Box>
         <SelectInput
@@ -198,7 +198,7 @@ function App({ initialConfig, scope }: AppProps) {
       <Box flexDirection="column">
         <Box marginBottom={1}>
           <Text bold color="cyan">
-            General Settings
+            ⚙️  General Settings
           </Text>
         </Box>
         <SelectInput
@@ -232,7 +232,7 @@ function App({ initialConfig, scope }: AppProps) {
       <Box flexDirection="column">
         <Box marginBottom={1}>
           <Text bold color="cyan">
-            Live Preview
+            👁️  Live Preview
           </Text>
         </Box>
         <Box marginBottom={1} flexDirection="column">
@@ -256,15 +256,15 @@ function App({ initialConfig, scope }: AppProps) {
     const currentCmd = getCurrentClaudeCommand();
 
     const items = [
-      { label: installed ? "Update Installation" : "Install to Claude Code", value: "install" },
-      { label: "Back", value: "back" },
+      { label: installed ? "🔄 Update Installation" : "📥 Install to Claude Code", value: "install" },
+      { label: "⬅️  Back", value: "back" },
     ];
 
     return (
       <Box flexDirection="column">
         <Box marginBottom={1}>
           <Text bold color="cyan">
-            Claude Code Integration
+            📦 Claude Code Integration
           </Text>
         </Box>
         <Box marginBottom={1} flexDirection="column">
@@ -318,7 +318,7 @@ function App({ initialConfig, scope }: AppProps) {
 }
 
 export async function launchTui(scope: "local" | "global") {
-  const config = await loadConfig();
+  const config = await loadConfigForScope(scope);
 
   const { waitUntilExit } = render(<App initialConfig={config} scope={scope} />);
   await waitUntilExit();

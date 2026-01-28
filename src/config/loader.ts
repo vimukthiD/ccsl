@@ -1,4 +1,5 @@
 import { cosmiconfig } from "cosmiconfig";
+import { existsSync } from "fs";
 import { defaultConfig } from "./defaults.js";
 import type { Theme } from "../themes/index.js";
 import type { WidgetType } from "../widgets/index.js";
@@ -34,11 +35,42 @@ export async function loadConfig(searchFrom?: string): Promise<CcslConfig> {
     if (result && result.config) {
       return mergeConfig(defaultConfig, result.config);
     }
+
+    // Fall back to global config if no local config found
+    const globalPath = getConfigPath("global");
+    if (existsSync(globalPath)) {
+      const globalResult = await explorer.load(globalPath);
+      if (globalResult && globalResult.config) {
+        return mergeConfig(defaultConfig, globalResult.config);
+      }
+    }
   } catch {
     // Config loading failed, use defaults
   }
 
   return { ...defaultConfig };
+}
+
+export async function loadConfigForScope(scope: "local" | "global"): Promise<CcslConfig> {
+  const configPath = getConfigPath(scope);
+
+  // For global scope, try to load the global config file directly
+  if (scope === "global") {
+    if (existsSync(configPath)) {
+      try {
+        const result = await explorer.load(configPath);
+        if (result && result.config) {
+          return mergeConfig(defaultConfig, result.config);
+        }
+      } catch {
+        // Fall through to defaults
+      }
+    }
+    return { ...defaultConfig };
+  }
+
+  // For local scope, try local first, then fall back to global
+  return loadConfig();
 }
 
 export async function loadConfigFromFile(filePath: string): Promise<CcslConfig> {
