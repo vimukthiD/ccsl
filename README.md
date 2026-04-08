@@ -61,8 +61,10 @@ Claude Code passes JSON data via stdin to ccsl, which formats it into a beautifu
 | `lines`     | Lines added/removed        | `+156 -23`           |
 | `directory` | Current directory          | `my-project`         |
 | `version`   | Claude Code version        | `v1.0.80`            |
-| `usage`     | Session usage with limit   | `▰▰▰▱▱ 75/100 (Pro)` |
-| `resetTime` | Time until usage resets    | `1h30m`              |
+| `usage`     | Session usage with limit*  | `▰▰▰▱▱ 75/100 (Pro)` |
+| `resetTime` | Time until usage resets*   | `1h30m`              |
+
+\* **Note:** The `usage` and `resetTime` widgets require Claude Code to expose `session_usage` data, which is [not yet available](https://github.com/anthropics/claude-code/issues/18121). These widgets are included for future compatibility.
 
 ### Built-in Themes
 
@@ -199,6 +201,8 @@ ccsl receives JSON from Claude Code via stdin:
 ```
 
 ### Session Usage Fields
+
+> **Note:** Claude Code does not currently expose `session_usage` data to status line commands. This is a [requested feature](https://github.com/anthropics/claude-code/issues/18121). The schema below is included for future compatibility when/if this data becomes available.
 
 The `session_usage` object supports the following fields for the `usage` and `resetTime` widgets:
 

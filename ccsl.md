@@ -91,6 +91,8 @@ ccsl receives JSON via stdin with the following structure:
 
 #### Session Usage Fields
 
+> **Note:** Claude Code does not currently expose `session_usage` data to status line commands. This is a [requested feature](https://github.com/anthropics/claude-code/issues/18121). The schema below is included for future compatibility when/if this data becomes available.
+
 The `session_usage` object provides usage limit information for the `usage` and `resetTime` widgets:
 
 | Field              | Type   | Description                               |
@@ -118,8 +120,10 @@ The `session_usage` object provides usage limit information for the `usage` and 
 | Lines     | Lines added/removed               | `+156 -23`           |
 | Directory | Current working directory         | `📁 my-project`      |
 | Version   | Claude Code version               | `v1.0.80`            |
-| Usage     | Session usage with limit          | `▰▰▰▱▱ 75/100 (Pro)` |
-| ResetTime | Time until usage resets           | `⟳ 1h30m`            |
+| Usage     | Session usage with limit*         | `▰▰▰▱▱ 75/100 (Pro)` |
+| ResetTime | Time until usage resets*          | `⟳ 1h30m`            |
+
+\* **Note:** The `usage` and `resetTime` widgets require Claude Code to expose `session_usage` data, which is [not yet available](https://github.com/anthropics/claude-code/issues/18121). These widgets are included for future compatibility.
 
 ### 3.2 Configuration Scopes
 
