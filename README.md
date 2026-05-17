@@ -311,6 +311,51 @@ echo '{"model":{"display_name":"Opus"},"context_window":{"used_percentage":45}}'
 npm unlink -g @vimukthid/ccsl
 ```
 
+## Releasing a New Version
+
+### One-liner
+
+Commits everything, bumps the version, creates the git tag, pushes both, and publishes to npm:
+
+```bash
+git add -A && git commit -m "release notes" && npm version patch -m "v%s" && git push --follow-tags && npm publish --access public
+```
+
+Swap `patch` for `minor` or `major` as appropriate, or pass an explicit version: `npm version 1.2.3`.
+
+### What each step does
+
+1. `git add -A && git commit -m "…"` — commit all changes. `npm version` refuses to run on a dirty working tree.
+2. `npm version patch -m "v%s"` — bumps `version` in `package.json`, syncs `package-lock.json`, creates a commit, and creates an annotated git tag (e.g. `v1.0.7`). `%s` is replaced with the new version.
+3. `git push --follow-tags` — pushes commits **and** the new annotated tag in a single call.
+4. `npm publish --access public` — `prepublishOnly` automatically runs `npm run build` first, so `dist/` is guaranteed fresh. `--access public` is required the first time for scoped packages (and harmless every time after).
+
+If any step fails, the chain stops — fix the failure and re-run from there.
+
+### Prerequisites (one-time setup)
+
+```bash
+npm whoami            # if it errors: npm login
+```
+You need publish rights to the correct scope.
+
+### Pre-release checklist
+
+```bash
+npm run typecheck     # tsc --noEmit
+npm run test:run      # vitest run
+npm run build         # tsup
+npm pack --dry-run    # preview the tarball contents
+npm audit             # confirm 0 vulnerabilities
+```
+
+### After publishing
+
+```bash
+npm view @vimukthid/ccsl@latest version
+npx --yes @vimukthid/ccsl --version
+```
+
 ## License
 
 MIT
