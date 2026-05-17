@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { formatStatusLine, sampleStatusInput } from "./formatter.js";
 import type { StatusInput } from "./parser.js";
 import type { CcslConfig } from "./config/loader.js";
+import type { WidgetType } from "./widgets/index.js";
 
 describe("formatStatusLine", () => {
   const baseConfig: CcslConfig = {
@@ -30,7 +31,7 @@ describe("formatStatusLine", () => {
   });
 
   it("should respect widget order", () => {
-    const config = { ...baseConfig, widgets: ["cost", "model"] as const };
+    const config = { ...baseConfig, widgets: ["cost", "model"] as WidgetType[] };
     const result = formatStatusLine(sampleStatusInput, config);
 
     const costIndex = result.indexOf("0.02");
@@ -54,14 +55,14 @@ describe("formatStatusLine", () => {
   });
 
   it("should format duration widget", () => {
-    const config = { ...baseConfig, widgets: ["duration"] as const };
+    const config = { ...baseConfig, widgets: ["duration"] as WidgetType[] };
     const result = formatStatusLine(sampleStatusInput, config);
 
     expect(result).toContain("45s"); // 45000ms = 45s
   });
 
   it("should format lines widget", () => {
-    const config = { ...baseConfig, widgets: ["lines"] as const };
+    const config = { ...baseConfig, widgets: ["lines"] as WidgetType[] };
     const result = formatStatusLine(sampleStatusInput, config);
 
     expect(result).toContain("+156");
@@ -69,14 +70,14 @@ describe("formatStatusLine", () => {
   });
 
   it("should format directory widget", () => {
-    const config = { ...baseConfig, widgets: ["directory"] as const };
+    const config = { ...baseConfig, widgets: ["directory"] as WidgetType[] };
     const result = formatStatusLine(sampleStatusInput, config);
 
     expect(result).toContain("my-project");
   });
 
   it("should format version widget", () => {
-    const config = { ...baseConfig, widgets: ["version"] as const };
+    const config = { ...baseConfig, widgets: ["version"] as WidgetType[] };
     const result = formatStatusLine(sampleStatusInput, config);
 
     expect(result).toContain("1.0.80");
@@ -109,7 +110,7 @@ describe("formatStatusLine", () => {
       },
     };
 
-    const config = { ...baseConfig, widgets: ["context"] as const };
+    const config = { ...baseConfig, widgets: ["context"] as WidgetType[] };
     const result = formatStatusLine(highUsage, config);
 
     expect(result).toContain("70%");
@@ -124,5 +125,68 @@ describe("formatStatusLine", () => {
 
       expect(result).toContain("Opus");
     }
+  });
+
+  it("should render worktree from JSON (workspace.git_worktree)", () => {
+    const config = { ...baseConfig, widgets: ["worktree"] as WidgetType[] };
+    const input: StatusInput = {
+      workspace: { current_dir: "/x", git_worktree: "feature-payments" },
+    };
+    const result = formatStatusLine(input, config);
+    expect(result).toContain("feature-payments");
+  });
+
+  it("should prefer worktree.name over workspace.git_worktree", () => {
+    const config = { ...baseConfig, widgets: ["worktree"] as WidgetType[] };
+    const input: StatusInput = {
+      workspace: { current_dir: "/x", git_worktree: "linked" },
+      worktree: { name: "session-name" },
+    };
+    const result = formatStatusLine(input, config);
+    expect(result).toContain("session-name");
+    expect(result).not.toContain("linked");
+  });
+
+  it("should hide worktree widget when no worktree data present", () => {
+    const config = { ...baseConfig, widgets: ["worktree"] as WidgetType[] };
+    const result = formatStatusLine({ workspace: { current_dir: "/x" } }, config);
+    // eslint-disable-next-line no-control-regex
+    expect(result.replace(/\x1b\[0m/g, "").trim()).toBe("");
+  });
+
+  it("should render rateLimit from rate_limits.five_hour", () => {
+    const config = { ...baseConfig, widgets: ["rateLimit"] as WidgetType[] };
+    const input: StatusInput = {
+      rate_limits: { five_hour: { used_percentage: 24, resets_at: 1738425600 } },
+    };
+    const result = formatStatusLine(input, config);
+    expect(result).toContain("24%");
+    expect(result).toContain("resets");
+  });
+
+  it("should render weeklyLimit from rate_limits.seven_day", () => {
+    const config = { ...baseConfig, widgets: ["weeklyLimit"] as WidgetType[] };
+    const input: StatusInput = {
+      rate_limits: { seven_day: { used_percentage: 41, resets_at: 1738857600 } },
+    };
+    const result = formatStatusLine(input, config);
+    expect(result).toContain("41%");
+  });
+
+  it("should hide rateLimit widget when rate_limits absent", () => {
+    const config = { ...baseConfig, widgets: ["rateLimit"] as WidgetType[] };
+    const result = formatStatusLine({ model: { display_name: "Opus" } }, config);
+    // eslint-disable-next-line no-control-regex
+    expect(result.replace(/\x1b\[0m/g, "").trim()).toBe("");
+  });
+
+  it("should render branch from worktree.branch without invoking git", () => {
+    const config = { ...baseConfig, widgets: ["branch"] as WidgetType[] };
+    const input: StatusInput = {
+      workspace: { current_dir: "/nonexistent/path/that/cannot/exist" },
+      worktree: { branch: "feature/payments" },
+    };
+    const result = formatStatusLine(input, config);
+    expect(result).toContain("feature/payments");
   });
 });

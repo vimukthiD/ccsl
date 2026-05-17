@@ -19,6 +19,14 @@ export interface ThemeColors {
   usageHigh?: ColorStyle;
   usageCritical?: ColorStyle;
   resetTime?: ColorStyle;
+  branch?: ColorStyle;
+  worktree?: ColorStyle;
+  rateLimit?: ColorStyle;
+  rateLimitHigh?: ColorStyle;
+  rateLimitCritical?: ColorStyle;
+  weeklyLimit?: ColorStyle;
+  weeklyLimitHigh?: ColorStyle;
+  weeklyLimitCritical?: ColorStyle;
 }
 
 export interface Theme {
@@ -48,6 +56,14 @@ const neonTheme: Theme = {
     usageHigh: { fg: "#ffff00" },
     usageCritical: { fg: "#ff0000", bold: true },
     resetTime: { fg: "#ff00ff" },
+    branch: { fg: "#ff00ff" },
+    worktree: { fg: "#00ff00" },
+    rateLimit: { fg: "#00ffaa" },
+    rateLimitHigh: { fg: "#ffff00" },
+    rateLimitCritical: { fg: "#ff0000", bold: true },
+    weeklyLimit: { fg: "#00aaff" },
+    weeklyLimitHigh: { fg: "#ffff00" },
+    weeklyLimitCritical: { fg: "#ff0000", bold: true },
   },
 };
 
@@ -72,6 +88,14 @@ const rainbowTheme: Theme = {
     usageHigh: { fg: "#ffff00" },
     usageCritical: { fg: "#ff0000", bold: true },
     resetTime: { fg: "#ff7f00" },
+    branch: { fg: "#9400d3" },
+    worktree: { fg: "#00ff00" },
+    rateLimit: { fg: "#00ff00" },
+    rateLimitHigh: { fg: "#ffff00" },
+    rateLimitCritical: { fg: "#ff0000", bold: true },
+    weeklyLimit: { fg: "#4b0082" },
+    weeklyLimitHigh: { fg: "#ffff00" },
+    weeklyLimitCritical: { fg: "#ff0000", bold: true },
   },
 };
 
@@ -96,6 +120,14 @@ const oceanTheme: Theme = {
     usageHigh: { fg: "#4dd0e1" },
     usageCritical: { fg: "#ff5252", bold: true },
     resetTime: { fg: "#0288d1" },
+    branch: { fg: "#80deea" },
+    worktree: { fg: "#26c6da" },
+    rateLimit: { fg: "#26c6da" },
+    rateLimitHigh: { fg: "#4dd0e1" },
+    rateLimitCritical: { fg: "#ff5252", bold: true },
+    weeklyLimit: { fg: "#0288d1" },
+    weeklyLimitHigh: { fg: "#4dd0e1" },
+    weeklyLimitCritical: { fg: "#ff5252", bold: true },
   },
 };
 
@@ -120,6 +152,14 @@ const minimalTheme: Theme = {
     usageHigh: { fg: "#e5c07b" },
     usageCritical: { fg: "#e06c75", bold: true },
     resetTime: { fg: "#61afef" },
+    branch: { fg: "#888888" },
+    worktree: { fg: "#888888" },
+    rateLimit: { fg: "#98c379" },
+    rateLimitHigh: { fg: "#e5c07b" },
+    rateLimitCritical: { fg: "#e06c75", bold: true },
+    weeklyLimit: { fg: "#61afef" },
+    weeklyLimitHigh: { fg: "#e5c07b" },
+    weeklyLimitCritical: { fg: "#e06c75", bold: true },
   },
   icons: {
     model: "",
@@ -130,6 +170,10 @@ const minimalTheme: Theme = {
     directory: "",
     usage: "",
     resetTime: "",
+    branch: "",
+    worktree: "",
+    rateLimit: "",
+    weeklyLimit: "",
   },
 };
 
@@ -154,6 +198,14 @@ const monochromeTheme: Theme = {
     usageHigh: { fg: "#ffffff", bold: true },
     usageCritical: { fg: "#ffffff", bold: true, underline: true },
     resetTime: { fg: "#999999" },
+    branch: { fg: "#aaaaaa" },
+    worktree: { fg: "#cccccc" },
+    rateLimit: { fg: "#bbbbbb" },
+    rateLimitHigh: { fg: "#ffffff", bold: true },
+    rateLimitCritical: { fg: "#ffffff", bold: true, underline: true },
+    weeklyLimit: { fg: "#999999" },
+    weeklyLimitHigh: { fg: "#ffffff", bold: true },
+    weeklyLimitCritical: { fg: "#ffffff", bold: true, underline: true },
   },
   icons: {
     model: "",
@@ -164,6 +216,10 @@ const monochromeTheme: Theme = {
     directory: "",
     usage: "",
     resetTime: "",
+    branch: "",
+    worktree: "",
+    rateLimit: "",
+    weeklyLimit: "",
   },
 };
 
@@ -188,6 +244,14 @@ const corporateTheme: Theme = {
     usageHigh: { fg: "#f59e0b" },
     usageCritical: { fg: "#ef4444", bold: true },
     resetTime: { fg: "#3b82f6" },
+    branch: { fg: "#94a3b8" },
+    worktree: { fg: "#3b82f6" },
+    rateLimit: { fg: "#22c55e" },
+    rateLimitHigh: { fg: "#f59e0b" },
+    rateLimitCritical: { fg: "#ef4444", bold: true },
+    weeklyLimit: { fg: "#3b82f6" },
+    weeklyLimitHigh: { fg: "#f59e0b" },
+    weeklyLimitCritical: { fg: "#ef4444", bold: true },
   },
 };
 

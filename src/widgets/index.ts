@@ -5,6 +5,7 @@ import { getIcon } from "../utils/icons.js";
 import { applyStyle } from "../utils/colors.js";
 import { formatNumber, formatDuration, formatCost } from "../utils/format.js";
 import path from "path";
+import { execFileSync } from "child_process";
 
 export type WidgetType =
   | "model"
@@ -16,7 +17,11 @@ export type WidgetType =
   | "directory"
   | "version"
   | "usage"
-  | "resetTime";
+  | "resetTime"
+  | "branch"
+  | "worktree"
+  | "rateLimit"
+  | "weeklyLimit";
 
 export const availableWidgets: WidgetType[] = [
   "model",
@@ -29,6 +34,10 @@ export const availableWidgets: WidgetType[] = [
   "version",
   "usage",
   "resetTime",
+  "branch",
+  "worktree",
+  "rateLimit",
+  "weeklyLimit",
 ];
 
 export interface WidgetResult {
@@ -63,6 +72,14 @@ export function renderWidget(
       return renderUsage(input, theme, config);
     case "resetTime":
       return renderResetTime(input, theme, config);
+    case "branch":
+      return renderBranch(input, theme, config);
+    case "worktree":
+      return renderWorktree(input, theme, config);
+    case "rateLimit":
+      return renderRateLimit(input, theme, config);
+    case "weeklyLimit":
+      return renderWeeklyLimit(input, theme, config);
     default:
       return { content: "", visible: false };
   }
@@ -358,4 +375,160 @@ function formatResetDuration(seconds: number): string {
   }
 
   return `${seconds}s`;
+}
+
+// Cache git branch lookups per cwd within a single invocation.
+const branchCache = new Map<string, string | null>();
+
+function getGitBranch(cwd: string): string | null {
+  if (branchCache.has(cwd)) {
+    return branchCache.get(cwd) ?? null;
+  }
+  let branch: string | null = null;
+  try {
+    const out = execFileSync("git", ["symbolic-ref", "--short", "HEAD"], {
+      cwd,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+      timeout: 500,
+    });
+    branch = out.trim() || null;
+  } catch {
+    // Detached HEAD or not a git repo — try short SHA as a fallback.
+    try {
+      const out = execFileSync("git", ["rev-parse", "--short", "HEAD"], {
+        cwd,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+        timeout: 500,
+      });
+      const sha = out.trim();
+      branch = sha ? `(${sha})` : null;
+    } catch {
+      branch = null;
+    }
+  }
+  branchCache.set(cwd, branch);
+  return branch;
+}
+
+function renderBranch(input: StatusInput, theme: Theme, config: CcslConfig): WidgetResult {
+  // Prefer the worktree branch from the JSON (only present during --worktree sessions),
+  // otherwise shell out to git in the current directory.
+  const jsonBranch = input.worktree?.branch;
+  const cwd = input.workspace?.current_dir || input.cwd;
+  const branch = jsonBranch || (cwd ? getGitBranch(cwd) : null);
+
+  if (!branch) {
+    return { content: "", visible: false };
+  }
+
+  const icon = getIcon("branch", theme, config.icons);
+  const text = icon ? `${icon} ${branch}` : branch;
+  const content = applyStyle(text, theme.colors.branch);
+  return { content, visible: true };
+}
+
+function renderWorktree(input: StatusInput, theme: Theme, config: CcslConfig): WidgetResult {
+  // Prefer the --worktree session name, fall back to any linked git worktree under cwd.
+  const name = input.worktree?.name || input.workspace?.git_worktree;
+  if (!name) {
+    return { content: "", visible: false };
+  }
+
+  const icon = getIcon("worktree", theme, config.icons);
+  const text = icon ? `${icon} ${name}` : name;
+  const content = applyStyle(text, theme.colors.worktree);
+  return { content, visible: true };
+}
+
+function renderRateLimit(input: StatusInput, theme: Theme, config: CcslConfig): WidgetResult {
+  const five = input.rate_limits?.five_hour;
+  if (!five || five.used_percentage === undefined) {
+    return { content: "", visible: false };
+  }
+  return renderLimitWidget(
+    five.used_percentage,
+    five.resets_at,
+    "rateLimit",
+    theme,
+    config
+  );
+}
+
+function renderWeeklyLimit(input: StatusInput, theme: Theme, config: CcslConfig): WidgetResult {
+  const week = input.rate_limits?.seven_day;
+  if (!week || week.used_percentage === undefined) {
+    return { content: "", visible: false };
+  }
+  return renderLimitWidget(
+    week.used_percentage,
+    week.resets_at,
+    "weeklyLimit",
+    theme,
+    config
+  );
+}
+
+function renderLimitWidget(
+  percentage: number,
+  resetsAt: number | undefined,
+  kind: "rateLimit" | "weeklyLimit",
+  theme: Theme,
+  config: CcslConfig
+): WidgetResult {
+  const icon = getIcon(kind, theme, config.icons);
+
+  // Pick color tier based on usage, falling back to the base color.
+  const highKey = (kind + "High") as "rateLimitHigh" | "weeklyLimitHigh";
+  const criticalKey = (kind + "Critical") as "rateLimitCritical" | "weeklyLimitCritical";
+  let style = theme.colors[kind];
+  if (percentage >= 90) {
+    style = theme.colors[criticalKey] || style;
+  } else if (percentage >= 70) {
+    style = theme.colors[highKey] || style;
+  }
+
+  const bar = renderLimitBar(percentage, style);
+  const pct = `${Math.round(percentage)}%`;
+  const resetStr = resetsAt ? ` resets ${formatResetClock(resetsAt, kind)}` : "";
+
+  const parts: string[] = [];
+  if (icon) parts.push(applyStyle(icon, style));
+  parts.push(bar);
+  parts.push(applyStyle(`${pct}${resetStr}`, style));
+
+  return { content: parts.join(" "), visible: true };
+}
+
+function renderLimitBar(
+  percentage: number,
+  filledStyle: import("../utils/colors.js").ColorStyle | undefined
+): string {
+  const total = 10;
+  const clamped = Math.max(0, Math.min(100, percentage));
+  const filled = Math.round((clamped / 100) * total);
+  const empty = total - filled;
+  const filledStr = applyStyle("█".repeat(filled), filledStyle);
+  const emptyStr = applyStyle("░".repeat(empty), { fg: "#444444", dim: true });
+  return `${filledStr}${emptyStr}`;
+}
+
+function formatResetClock(epochSeconds: number, kind: "rateLimit" | "weeklyLimit"): string {
+  const date = new Date(epochSeconds * 1000);
+  if (Number.isNaN(date.getTime())) {
+    return "?";
+  }
+  // 5-hour window: time of day. 7-day window: weekday + time.
+  if (kind === "rateLimit") {
+    return date.toLocaleTimeString(undefined, {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  }
+  return date.toLocaleString(undefined, {
+    weekday: "short",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }

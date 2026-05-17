@@ -51,20 +51,27 @@ Claude Code passes JSON data via stdin to ccsl, which formats it into a beautifu
 
 ### Available Widgets
 
-| Widget      | Description                | Example              |
-|-------------|----------------------------|----------------------|
-| `model`     | Claude model name          | `Opus`               |
-| `context`   | Context window usage %     | `42%`                |
-| `tokens`    | Input/Output tokens        | `↑15.2k ↓4.5k`       |
-| `cost`      | Session cost USD           | `$0.02`              |
-| `duration`  | Session duration           | `45s`                |
-| `lines`     | Lines added/removed        | `+156 -23`           |
-| `directory` | Current directory          | `my-project`         |
-| `version`   | Claude Code version        | `v1.0.80`            |
-| `usage`     | Session usage with limit*  | `▰▰▰▱▱ 75/100 (Pro)` |
-| `resetTime` | Time until usage resets*   | `1h30m`              |
+| Widget        | Description                          | Example                          |
+|---------------|--------------------------------------|----------------------------------|
+| `model`       | Claude model name                    | `Opus`                           |
+| `context`     | Context window usage %               | `42%`                            |
+| `tokens`      | Input/Output tokens                  | `↑15.2k ↓4.5k`                   |
+| `cost`        | Session cost USD                     | `$0.02`                          |
+| `duration`    | Session duration                     | `45s`                            |
+| `lines`       | Lines added/removed                  | `+156 -23`                       |
+| `directory`   | Current directory                    | `my-project`                     |
+| `version`     | Claude Code version                  | `v1.0.80`                        |
+| `branch`      | Current git branch (from `cwd`)†     | `⎇ main`                         |
+| `worktree`    | Active git worktree name‡            | `🌳 feature-payments`            |
+| `rateLimit`   | 5-hour rolling rate limit§           | `████░░░░░░ 42% resets 2:00 PM` |
+| `weeklyLimit` | 7-day rolling rate limit§            | `███████░░░ 68% resets Tue`     |
+| `usage`       | Legacy `session_usage` widget*       | `▰▰▰▱▱ 75/100 (Pro)`             |
+| `resetTime`   | Legacy `session_usage` reset widget* | `1h30m`                          |
 
-\* **Note:** The `usage` and `resetTime` widgets require Claude Code to expose `session_usage` data, which is [not yet available](https://github.com/anthropics/claude-code/issues/18121). These widgets are included for future compatibility.
+† `branch` invokes `git symbolic-ref --short HEAD` in the working directory (with a `git rev-parse --short HEAD` fallback for detached HEAD). Cached per-cwd within a single invocation.
+‡ `worktree` reads `worktree.name` (set during `--worktree` sessions) and falls back to `workspace.git_worktree` (set for any linked git worktree).
+§ `rateLimit` / `weeklyLimit` read `rate_limits.five_hour` and `rate_limits.seven_day`. These fields are only emitted by Claude Code for Claude.ai Pro/Max subscribers after the first API response in a session; the widgets render nothing when the data is absent.
+\* The `usage` and `resetTime` widgets rely on a `session_usage` field that Claude Code never shipped. Prefer `rateLimit` / `weeklyLimit` for the same information.
 
 ### Built-in Themes
 
@@ -164,7 +171,15 @@ ccsl config --local   # or just: ccsl config
       "usage": { "fg": "#98c379" },
       "usageHigh": { "fg": "#e5c07b" },
       "usageCritical": { "fg": "#e06c75" },
-      "resetTime": { "fg": "#61afef" }
+      "resetTime": { "fg": "#61afef" },
+      "branch": { "fg": "#abb2bf" },
+      "worktree": { "fg": "#61afef" },
+      "rateLimit": { "fg": "#98c379" },
+      "rateLimitHigh": { "fg": "#e5c07b" },
+      "rateLimitCritical": { "fg": "#e06c75" },
+      "weeklyLimit": { "fg": "#61afef" },
+      "weeklyLimitHigh": { "fg": "#e5c07b" },
+      "weeklyLimitCritical": { "fg": "#e06c75" }
     }
   }
 }
@@ -190,6 +205,15 @@ ccsl receives JSON from Claude Code via stdin:
   },
   "workspace": { "current_dir": "/path/to/project" },
   "version": "1.0.80",
+  "rate_limits": {
+    "five_hour": { "used_percentage": 23.5, "resets_at": 1738425600 },
+    "seven_day": { "used_percentage": 41.2, "resets_at": 1738857600 }
+  },
+  "worktree": {
+    "name": "my-feature",
+    "path": "/path/to/.claude/worktrees/my-feature",
+    "branch": "worktree-my-feature"
+  },
   "session_usage": {
     "requests_used": 45,
     "requests_limit": 100,
@@ -253,10 +277,10 @@ ccsl install
 # Option 2: Install directly from the built package
 cd /path/to/ccsl
 npm run build
-npm pack  # Creates @vimukthid-ccsl-1.0.5.tgz
+npm pack  # Creates @vimukthid-ccsl-1.0.6.tgz
 
 # Install the tarball globally
-npm install -g ./vimukthid-ccsl-1.0.5.tgz
+npm install -g ./vimukthid-ccsl-1.0.6.tgz
 ```
 
 ```bash

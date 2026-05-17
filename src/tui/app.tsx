@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { render, Box, Text, useApp, useInput } from "ink";
 import SelectInput from "ink-select-input";
 import { loadConfigForScope, getConfigPath, type CcslConfig } from "../config/loader.js";

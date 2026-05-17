@@ -17,9 +17,41 @@ export const StatusInputSchema = z
       .object({
         current_dir: z.string().optional(),
         project_dir: z.string().optional(),
+        // Git worktree name when current directory is inside a linked worktree.
+        // Populated for any git worktree, unlike `worktree.*` which only applies to `--worktree` sessions.
+        git_worktree: z.string().optional(),
       })
       .optional(),
     version: z.string().optional(),
+    // Whether the most recent API response exceeded 200k input+cache+output tokens.
+    exceeds_200k_tokens: z.boolean().optional(),
+    // Active Claude Code worktree session (only present during `--worktree` sessions).
+    worktree: z
+      .object({
+        name: z.string().optional(),
+        path: z.string().optional(),
+        branch: z.string().optional(),
+        original_cwd: z.string().optional(),
+        original_branch: z.string().optional(),
+      })
+      .optional(),
+    // Claude.ai subscription rate limits (Pro/Max only, after first API response).
+    rate_limits: z
+      .object({
+        five_hour: z
+          .object({
+            used_percentage: z.number().optional(),
+            resets_at: z.number().optional(),
+          })
+          .optional(),
+        seven_day: z
+          .object({
+            used_percentage: z.number().optional(),
+            resets_at: z.number().optional(),
+          })
+          .optional(),
+      })
+      .optional(),
     output_style: z
       .object({
         name: z.string().optional(),

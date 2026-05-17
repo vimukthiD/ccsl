@@ -69,4 +69,14 @@ export const sampleStatusInput: StatusInput = {
     reset_in_seconds: 7200,
     plan: "Pro",
   },
+  rate_limits: {
+    five_hour: {
+      used_percentage: 23.5,
+      resets_at: Math.floor(Date.now() / 1000) + 2 * 60 * 60,
+    },
+    seven_day: {
+      used_percentage: 41.2,
+      resets_at: Math.floor(Date.now() / 1000) + 3 * 24 * 60 * 60,
+    },
+  },
 };

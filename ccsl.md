@@ -110,20 +110,28 @@ The `session_usage` object provides usage limit information for the `usage` and 
 
 ### 3.1 Status Line Widgets
 
-| Widget    | Description                       | Example Output       |
-|-----------|-----------------------------------|----------------------|
-| Model     | Current Claude model display name | `◈ Opus`             |
-| Context   | Context window usage percentage   | `◐ 42%`              |
-| Tokens    | Input/Output token counts         | `↑15.2k ↓4.5k`       |
-| Cost      | Session cost in USD               | `$0.01`              |
-| Duration  | Session duration                  | `⏱ 45s`              |
-| Lines     | Lines added/removed               | `+156 -23`           |
-| Directory | Current working directory         | `📁 my-project`      |
-| Version   | Claude Code version               | `v1.0.80`            |
-| Usage     | Session usage with limit*         | `▰▰▰▱▱ 75/100 (Pro)` |
-| ResetTime | Time until usage resets*          | `⟳ 1h30m`            |
+| Widget      | Description                                       | Example Output                    |
+|-------------|---------------------------------------------------|-----------------------------------|
+| Model       | Current Claude model display name                 | `◈ Opus`                          |
+| Context     | Context window usage percentage                   | `◐ 42%`                           |
+| Tokens      | Input/Output token counts                         | `↑15.2k ↓4.5k`                    |
+| Cost        | Session cost in USD                               | `$0.01`                           |
+| Duration    | Session duration                                  | `⏱ 45s`                           |
+| Lines       | Lines added/removed                               | `+156 -23`                        |
+| Directory   | Current working directory                         | `📁 my-project`                   |
+| Version     | Claude Code version                               | `v1.0.80`                         |
+| Branch      | Git branch (live `git` lookup in cwd)†            | `⎇ main`                          |
+| Worktree    | `worktree.name` ↦ `workspace.git_worktree`        | `🌳 feature-payments`             |
+| RateLimit   | 5-hour rate limit from `rate_limits.five_hour`‡   | `⏱ ████░░░░░░ 42% resets 2:00 PM` |
+| WeeklyLimit | 7-day rate limit from `rate_limits.seven_day`‡    | `📅 ███████░░░ 68% resets Tue`    |
+| Usage       | Legacy `session_usage` widget (never shipped)*    | `▰▰▰▱▱ 75/100 (Pro)`              |
+| ResetTime   | Legacy `session_usage` reset widget*              | `⟳ 1h30m`                         |
 
-\* **Note:** The `usage` and `resetTime` widgets require Claude Code to expose `session_usage` data, which is [not yet available](https://github.com/anthropics/claude-code/issues/18121). These widgets are included for future compatibility.
+† Runs `git symbolic-ref --short HEAD` (fallback: `git rev-parse --short HEAD`) with a 500ms timeout, cached per-cwd within a single invocation. For `--worktree` sessions, prefers `worktree.branch` from the JSON to avoid the subprocess.
+
+‡ Only emitted by Claude Code for Claude.ai Pro/Max subscribers, after the first API response in the session. Color shifts to "high" at ≥70% and "critical" at ≥90% (matching the dandoescode.com / danielmackay reference statuslines).
+
+\* The `usage` and `resetTime` widgets target a `session_usage` field Claude Code never shipped; the official equivalent is `rate_limits.*`. Prefer `rateLimit` / `weeklyLimit`.
 
 ### 3.2 Configuration Scopes
 
@@ -272,7 +280,7 @@ Muted blues and grays, enterprise-friendly appearance
     "widgets": {
       "type": "array",
       "items": {
-        "enum": ["model", "context", "tokens", "cost", "duration", "lines", "directory", "version", "usage", "resetTime"]
+        "enum": ["model", "context", "tokens", "cost", "duration", "lines", "directory", "version", "branch", "worktree", "rateLimit", "weeklyLimit", "usage", "resetTime"]
       },
       "default": ["model", "context", "tokens", "cost"]
     },

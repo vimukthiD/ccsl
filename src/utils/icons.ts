@@ -11,7 +11,11 @@ export type IconKey =
   | "directory"
   | "version"
   | "usage"
-  | "resetTime";
+  | "resetTime"
+  | "branch"
+  | "worktree"
+  | "rateLimit"
+  | "weeklyLimit";
 
 const nerdIcons: Record<IconKey, string> = {
   model: "◈",
@@ -24,6 +28,10 @@ const nerdIcons: Record<IconKey, string> = {
   version: "",
   usage: "󰓅",
   resetTime: "󰔟",
+  branch: "",
+  worktree: "",
+  rateLimit: "󱎫",
+  weeklyLimit: "󰸗",
 };
 
 const unicodeIcons: Record<IconKey, string> = {
@@ -37,6 +45,10 @@ const unicodeIcons: Record<IconKey, string> = {
   version: "v",
   usage: "▰",
   resetTime: "⟳",
+  branch: "⎇",
+  worktree: "🌳",
+  rateLimit: "⏱",
+  weeklyLimit: "📅",
 };
 
 const asciiIcons: Record<IconKey, string> = {
@@ -50,6 +62,10 @@ const asciiIcons: Record<IconKey, string> = {
   version: "v",
   usage: "#",
   resetTime: "~",
+  branch: "",
+  worktree: "",
+  rateLimit: "",
+  weeklyLimit: "",
 };
 
 let detectedIconMode: IconMode | null = null;

@@ -13,14 +13,18 @@ import {
 } from "./config/claude.js";
 import { writeFileSync, mkdirSync, existsSync } from "fs";
 import { dirname } from "path";
+import { createRequire } from "module";
 import { defaultConfig } from "./config/defaults.js";
+
+const require = createRequire(import.meta.url);
+const { version: pkgVersion } = require("../package.json") as { version: string };
 
 const program = new Command();
 
 program
   .name("ccsl")
   .description("Customizable status line formatter for Claude Code CLI")
-  .version("1.0.5");
+  .version(pkgVersion);
 
 program
   .command("install")
